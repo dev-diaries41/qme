@@ -7,11 +7,12 @@
     "dev": "ts-node src/index.ts",
     "start": "npm run build && node dist/index.js",
     "build": "tsc -p .",
+    "prepublishOnly": "npm run build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/dev-diaries41/qme.git"
+    "url": "git+https://github.com/dev-diaries41/qme.git"
   },
   "keywords": [
     "bullmq",
