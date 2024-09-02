@@ -1,6 +1,6 @@
 {
   "name": "qme",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A bullmq wrapper for workers and queues",
   "main": "dist/index.js",
   "scripts": {

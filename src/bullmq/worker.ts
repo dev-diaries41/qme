@@ -1,6 +1,6 @@
 import { Redis } from "ioredis";
 import { MetricsTime, Worker, WorkerOptions } from "bullmq";
-import { defaultHandlers } from "../bullmq/events";
+import { DefaultHandlers } from "../bullmq/events";
 import { ServiceJob, WorkerEventHandlers } from '../types'
 
 export class WorkerManager {
@@ -26,7 +26,7 @@ export class WorkerManager {
         return worker;
     }
 
-    public startWorker(handlers: WorkerEventHandlers = defaultHandlers) {
+    public startWorker(handlers: WorkerEventHandlers = DefaultHandlers) {
         this.worker.on('completed', handlers.onComplete);
         this.worker.on('failed', handlers.onFail);
         this.worker.on('active', handlers.onActive);

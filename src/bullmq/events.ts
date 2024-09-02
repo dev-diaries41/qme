@@ -36,7 +36,7 @@ export function onQueueError(error: Error, queueName: string){
     jobLogger.error({message: 'Queue error', queue: queueName});
 }
 
-export const defaultHandlers: WorkerEventHandlers = {
+export const DefaultHandlers: WorkerEventHandlers = {
     onComplete,
     onFail,
     onActive,

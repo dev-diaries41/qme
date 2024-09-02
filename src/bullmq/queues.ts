@@ -25,11 +25,11 @@ export class QueueManager {
 
   private async addJob(newJob: NewJob): Promise<Job> {
     const { name, data, opts = {} } = newJob;
-    return await this.queue.add(name, data, { ...opts,...this.jobOptions });
+    return await this.queue.add(name, data, {...this.jobOptions,  ...opts });
   }
 
   private async addBatchJobs(newJobs: NewJob[]): Promise<Job[]> {
-    const formattedJobs = newJobs.map(job => ({...job, opts: {...(job.opts||{}), ...this.jobOptions}}))
+    const formattedJobs = newJobs.map(job => ({...job, opts: {...this.jobOptions, ...(job.opts||{})}}))
     return await this.queue.addBulk(formattedJobs);
   }
   
