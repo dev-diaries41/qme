@@ -1,26 +1,28 @@
 import { Redis } from "ioredis";
 import { Job, JobsOptions, Queue } from "bullmq";
-import { jobLogger } from "../logger";
 import { JobResult, NewJob, ServiceJobData, jobReceipt } from '../types'
-import { onQueueError } from "../bullmq/events";
 import { JobErrors , BackgroundJobs} from "./constants";
+import { Logger } from "winston";
 
 
 export class QueueManager {
   public readonly queue: Queue;
   private readonly jobOptions: JobsOptions;
+  private readonly jobLogger: Logger; 
 
   static readonly DefaultJobOpts: JobsOptions = {
       attempts: 1,
       removeOnFail: { age: 3600 },
       removeOnComplete: true,
-      
   }
 
-  constructor(serviceName: string, redis: Redis, jobOptions?: JobsOptions) {
+  constructor(serviceName: string, redis: Redis, logger: Logger, jobOptions?: JobsOptions) {
       this.jobOptions = { ...QueueManager.DefaultJobOpts, ...jobOptions };
       this.queue = new Queue(serviceName, { connection: redis });
-      this.queue.on('error', (error) => onQueueError(error, serviceName)); 
+      this.jobLogger = logger;
+      this.queue.on('error', (error) => {
+        console.error({message: 'Queue error', queue: this.queue.name, details: error.message});
+      }); 
   }
 
   private async addJob(newJob: NewJob): Promise<Job> {
@@ -47,7 +49,7 @@ export class QueueManager {
           const job = await this.addJob(newJob);
           return await this.getJobReceipt(job);
       } catch (error: any) {
-          jobLogger.error({message: JobErrors.JOB_NOT_ADDED, details: error.message});
+          this.jobLogger.error({message: JobErrors.JOB_NOT_ADDED, details: error.message});
           throw new Error(JobErrors.JOB_NOT_ADDED);
       }
   }
@@ -57,7 +59,7 @@ export class QueueManager {
         const jobs = await this.addBatchJobs(newJobs);
         return await this.getJobReceipts(jobs);
     } catch (error: any) {
-        jobLogger.error({message: JobErrors.JOB_NOT_ADDED, details: error.message});
+        this.jobLogger.error({message: JobErrors.JOB_NOT_ADDED, details: error.message});
         throw new Error(JobErrors.JOB_NOT_ADDED);
     }
 }
@@ -74,9 +76,9 @@ export class QueueManager {
       const existingBackgroundJob = await this.findJobByName(name);
       if(!existingBackgroundJob){    
           await this.queue.add(name, jobData, {repeat: {pattern}});
-          jobLogger.info({message: `Added recurring job`, name});
+          this.jobLogger.info({message: `Added recurring job`, name});
       } else {
-          jobLogger.info({message: `Recurring job already exists.`, name});
+          this.jobLogger.info({message: `Recurring job already exists.`, name});
       }
   }
 
@@ -117,9 +119,9 @@ export class QueueManager {
       const job = await this.queue.getJob(jobId);
       if (!job) throw new Error(JobErrors.JOB_NOT_FOUND);
       await job.remove();
-      jobLogger.info({ message: `Cancelled job`, jobId, jobName: job.name});
+      this.jobLogger.info({ message: `Cancelled job`, jobId, jobName: job.name});
     } catch (error: any) {
-      jobLogger.error({ message: `Error cancelling job`, jobId, details: error.message });
+      this.jobLogger.error({ message: `Error cancelling job`, jobId, details: error.message });
     }
   }
 
@@ -128,9 +130,9 @@ export class QueueManager {
       const job = await this.findJobByName(name);
       if (!job) throw new Error(JobErrors.JOB_NOT_FOUND);
       await job.remove();
-      jobLogger.info({ message: `Cancelled job`, jobName: name});
+      this.jobLogger.info({ message: `Cancelled job`, jobName: name});
     } catch (error: any) {
-      jobLogger.error({ message: `Error cancelling job`, jobName: name, details: error.message });
+      this.jobLogger.error({ message: `Error cancelling job`, jobName: name, details: error.message });
     }
   }
 
