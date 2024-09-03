@@ -110,7 +110,7 @@ export class QueueManager {
 }
 
   private filterJobReturnValue(returnValue: object & Partial<ServiceJobData>): Partial<ServiceJobData> {
-    const { initiatedBy, userId, ...filteredData } = returnValue;
+    const { initiatedBy, userId, ...filteredData } = returnValue || {};
     return filteredData;
   }
   
