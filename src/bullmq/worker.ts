@@ -26,9 +26,15 @@ export class WorkerManager {
     }
 
     public startWorker(handlers: WorkerEventHandlers) {
-        this.worker.on('completed', handlers.onComplete);
-        this.worker.on('failed', handlers.onFail);
-        this.worker.on('active', handlers.onActive);
+        if (handlers.onComplete){
+            this.worker.on('completed', handlers.onComplete);
+        }
+        if (handlers.onFail){
+            this.worker.on('failed', handlers.onFail);
+        }
+        if (handlers.onActive){
+            this.worker.on('active', handlers.onActive);
+        }
         if (handlers.onProgress){
             this.worker.on('progress', handlers.onProgress);
         }

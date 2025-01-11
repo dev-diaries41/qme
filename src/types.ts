@@ -12,8 +12,8 @@ export type ServiceJob = ((jobData: any) => any | void) | ((jobData: any) => Pro
 export interface ServiceJobData extends Record<string,any> {
   userId?: string;
   initiatedBy?: string;
-  webhookUrl?: string;}
-
+  webhookUrl?: string;
+}
 
 export interface NewJob { 
     name: string;
@@ -27,9 +27,9 @@ export interface JobResult {
 }
 
 export interface WorkerEventHandlers { 
-  onComplete: (job: Job) => void;
-  onFail: (job: Job | undefined, err: Error) => void;
-  onActive: (job: Job) => void;
+  onComplete?: (job: Job) => void;
+  onFail?: (job: Job | undefined, err: Error) => void;
+  onActive?: (job: Job) => void;
   onProgress?: (job: Job, timestamp: number | object) => void;
   onDrained?: () => void;
 }
@@ -42,7 +42,3 @@ export interface jobReceipt {
   delay: number
   jobName?: string;
  }
-
-
-  
-  
